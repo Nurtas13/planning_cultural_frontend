@@ -1,0 +1,6 @@
+export const LoginPage = () => {
+    return (
+        <div className="min-h-screen">
+        </div>
+    )
+}
