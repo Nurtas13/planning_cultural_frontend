@@ -9,11 +9,16 @@ export const LoginPage = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!email || !password) {
       alert("Fill all fields");
       return;
     }
+
     alert(`Logged in as ${email}`);
+
+    // 🔥 ВОТ ЭТО ДОБАВЛЯЕМ
+    navigate("/app/home");
   };
 
   const handleBack = () => navigate("/");
@@ -30,13 +35,17 @@ export const LoginPage = () => {
           ← Back
         </button>
 
-        {/* Заголовок */}
+        {/* Title */}
         <div className="text-center space-y-1">
-          <h2 className="text-2xl lg:text-3xl font-bold text-[#5b3a87]">Welcome Back</h2>
-          <p className="text-gray-500 text-sm lg:text-base">Sign in to continue your cultural journey</p>
+          <h2 className="text-2xl lg:text-3xl font-bold text-[#5b3a87]">
+            Welcome Back
+          </h2>
+          <p className="text-gray-500 text-sm lg:text-base">
+            Sign in to continue your cultural journey
+          </p>
         </div>
 
-        {/* Форма */}
+        {/* Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -45,7 +54,7 @@ export const LoginPage = () => {
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-11 pr-3 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5b3a87] placeholder-gray-400"
+              className="w-full pl-11 pr-3 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5b3a87]"
             />
           </div>
 
@@ -56,11 +65,14 @@ export const LoginPage = () => {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-11 pr-3 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5b3a87] placeholder-gray-400"
+              className="w-full pl-11 pr-3 py-3 border border-gray-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5b3a87]"
             />
           </div>
 
-          <button type="button" className="text-sm lg:text-base text-[#5b3a87] hover:underline text-left w-full">
+          <button
+            type="button"
+            className="text-sm lg:text-base text-[#5b3a87] hover:underline text-left w-full"
+          >
             Forgot password?
           </button>
 
@@ -74,25 +86,27 @@ export const LoginPage = () => {
 
         {/* Divider */}
         <div className="flex items-center gap-2 text-gray-400 text-sm lg:text-base">
-          <div className="flex-1 border-t border-gray-300"></div>
+          <div className="flex-1 border-t border-gray-300" />
           <span>Or continue with</span>
-          <div className="flex-1 border-t border-gray-300"></div>
+          <div className="flex-1 border-t border-gray-300" />
         </div>
 
-        {/* Social Buttons */}
+        {/* Social */}
         <div className="grid grid-cols-2 gap-3">
-          <button className="flex items-center justify-center gap-2 border border-gray-300 rounded-2xl py-2 shadow-sm hover:bg-gray-100 transition text-sm lg:text-base">
+          <button className="border border-gray-300 rounded-2xl py-2 hover:bg-gray-100">
             Google
           </button>
 
-          <button className="flex items-center justify-center gap-2 border border-gray-300 rounded-2xl py-2 shadow-sm hover:bg-gray-100 transition text-sm lg:text-base">
+          <button className="border border-gray-300 rounded-2xl py-2 hover:bg-gray-100">
             Facebook
           </button>
         </div>
 
         <p className="text-center text-sm lg:text-base text-gray-500">
           Don't have an account?{" "}
-          <button className="text-[#5b3a87] hover:underline">Sign up</button>
+          <button className="text-[#5b3a87] hover:underline">
+            Sign up
+          </button>
         </p>
       </div>
     </div>
