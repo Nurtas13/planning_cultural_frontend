@@ -1,144 +1,224 @@
 import {
   ArrowLeft,
   Calendar,
-  MapPin,
   Clock,
-  Users,
   Heart,
+  MapPin,
   Share2,
+  Users,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
-const eventDetails = {
-  1: {
-    image:
-      "https://images.unsplash.com/photo-1761173084851-1e5302e931fe?q=80&w=1080",
-    title: "Summer Jazz Festival",
-    date: "February 20, 2026",
-    time: "7:00 PM - 11:00 PM",
-    location: "Central Park Amphitheater",
-    attendees: 324,
-    description:
-      "Join us for an unforgettable evening of smooth jazz under the stars. Featuring international artists and local talent.",
-    highlights: [
-      "Live performances",
-      "Food trucks",
-      "VIP seating",
-      "Meet artists",
-    ],
-  },
+import { fetchEventById } from "../../api/eventsApi";
+import { isEventSaved, toggleSavedEvent } from "../../utils/eventStorage";
+import { createRegistration } from "../../api/registrationsApi";
+type EventItem = {
+  id: number;
+  title: string;
+  description?: string;
+  category: string;
+  location: string;
+  event_date: string;
+  event_time?: string;
+  image_url?: string | null;
+  price?: number;
+  max_participants?: number | null;
 };
+
+const fallbackImage =
+  "https://images.unsplash.com/photo-1507838153414-b4b713384a76?q=80&w=1200";
 
 export const EventDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const eventId = Number(id);
+  const [event, setEvent] = useState<EventItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saved, setSaved] = useState(false);
+  const [attendMessage, setAttendMessage] = useState("");
+  const [isRegistered, setIsRegistered] = useState(false);
 
-  const event =
-    eventDetails[eventId as keyof typeof eventDetails] ||
-    eventDetails[1];
+  useEffect(() => {
+    if (!id) return;
+
+    fetchEventById(Number(id))
+      .then((data) => {
+        setEvent(data);
+        setSaved(isEventSaved(data.id));
+      })
+      .catch(() => {
+        setEvent(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <section className="min-h-full bg-[#fbf7f3] px-6 py-8 text-[#563483]">
+        Loading event...
+      </section>
+    );
+  }
+
+  if (!event) {
+    return (
+      <section className="min-h-full bg-[#fbf7f3] px-6 py-8">
+        <button onClick={() => navigate(-1)} className="mb-6 text-[#563483]">
+          ← Back
+        </button>
+        <h1 className="text-2xl font-semibold text-[#220640]">
+          Event not found
+        </h1>
+      </section>
+    );
+  }
+
+  const handleSave = () => {
+    const result = toggleSavedEvent(event.id);
+    setSaved(result);
+  };
+
+  const handleShare = async () => {
+    const url = window.location.href;
+
+    if (navigator.share) {
+      await navigator.share({
+        title: event.title,
+        text: event.description || "Cultural event",
+        url,
+      });
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert("Link copied");
+    }
+  };
+  const handleAttend = async () => {
+    try {
+      await createRegistration(1, event.id);
+      setIsRegistered(true);
+      setAttendMessage("You are registered for this event");
+    } catch (error) {
+      setIsRegistered(true);
+      setAttendMessage(
+        error instanceof Error ? error.message : "Registration failed"
+      );
+    }
+  };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-
-      {/* IMAGE HEADER */}
-      <div className="relative h-64">
+    <section className="min-h-full bg-[#fbf7f3]">
+      <div className="relative h-72">
         <img
-          src={event.image}
+          src={
+            event.image_url && event.image_url.includes("images.unsplash.com")
+              ? event.image_url
+              : fallbackImage
+          }
           alt={event.title}
           className="w-full h-full object-cover"
         />
 
-        {/* BACK */}
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow"
+          className="absolute top-5 left-5 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft size={24} />
         </button>
 
-        {/* ACTIONS */}
-        <div className="absolute top-4 right-4 flex gap-2">
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow">
-            <Share2 className="w-5 h-5" />
+        <div className="absolute top-5 right-5 flex gap-3">
+          <button
+            onClick={handleShare}
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg"
+          >
+            <Share2 size={22} />
           </button>
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow">
-            <Heart className="w-5 h-5 text-red-500" />
+
+          <button
+            onClick={handleSave}
+            className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg"
+          >
+            <Heart
+              size={22}
+              className={saved ? "text-red-500 fill-red-500" : "text-red-500"}
+            />
           </button>
         </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex-1 px-4 py-6 space-y-5">
+      <div className="px-6 py-7 space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-[#220640]">
+            {event.title}
+          </h1>
+          <p className="flex items-center gap-2 text-[#84699d] mt-2">
+            <Users size={19} />
+            {event.max_participants || 0}+ max participants
+          </p>
+        </div>
+
+        <InfoCard
+          icon={<Calendar className="text-[#643b93]" />}
+          label="Date"
+          value={event.event_date}
+        />
+        <InfoCard
+          icon={<Clock className="text-[#e4b72f]" />}
+          label="Time"
+          value={event.event_time || "Not specified"}
+        />
+        <InfoCard
+          icon={<MapPin className="text-red-500" />}
+          label="Location"
+          value={event.location}
+        />
 
         <div>
-          <h2 className="text-xl font-semibold">{event.title}</h2>
-
-          <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-            <Users className="w-4 h-4" />
-            {event.attendees}+ attending
-          </div>
+          <h2 className="text-lg font-semibold text-[#220640] mb-3">
+            About Event
+          </h2>
+          <p className="text-[#5d4a70] leading-7">
+            {event.description || "No description"}
+          </p>
         </div>
 
-        {/* INFO */}
-        <div className="space-y-3">
+        {attendMessage && (
+  <div className="rounded-2xl bg-[#f8f3ef] border border-[#eadfd7] p-4 text-[#563483] text-center font-medium">
+    {attendMessage}
+  </div>
+)}
 
-          <div className="flex gap-3 p-3 bg-white rounded-xl shadow">
-            <Calendar className="w-5 h-5 text-blue-500" />
-            <div>
-              <p className="text-xs text-gray-500">Date</p>
-              <p className="text-sm">{event.date}</p>
-            </div>
-          </div>
-
-          <div className="flex gap-3 p-3 bg-white rounded-xl shadow">
-            <Clock className="w-5 h-5 text-green-500" />
-            <div>
-              <p className="text-xs text-gray-500">Time</p>
-              <p className="text-sm">{event.time}</p>
-            </div>
-          </div>
-
-          <div className="flex gap-3 p-3 bg-white rounded-xl shadow">
-            <MapPin className="w-5 h-5 text-red-500" />
-            <div>
-              <p className="text-xs text-gray-500">Location</p>
-              <p className="text-sm">{event.location}</p>
-            </div>
-          </div>
-
-        </div>
-
-        {/* DESCRIPTION */}
-        <div>
-          <h3 className="font-semibold mb-2">About Event</h3>
-          <p className="text-sm text-gray-600">{event.description}</p>
-        </div>
-
-        {/* HIGHLIGHTS */}
-        <div>
-          <h3 className="font-semibold mb-2">Highlights</h3>
-
-          <div className="space-y-2">
-            {event.highlights.map((h, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-                {h}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="h-20" />
+  <button
+    onClick={handleAttend}
+    disabled={isRegistered}
+    className={`w-full h-16 rounded-2xl text-white font-semibold text-lg shadow-lg transition ${
+      isRegistered ? "bg-[#8b77a3]" : "bg-[#643b93]"
+    }`}
+  >
+    {isRegistered ? "Registered" : "Attend Event"}
+  </button>
       </div>
-
-      {/* BUTTON */}
-      <div className="fixed bottom-0 w-full bg-white border-t p-4">
-        <button className="w-full bg-blue-500 text-white py-3 rounded-lg font-medium">
-          Attend Event
-        </button>
-      </div>
-    </div>
+    </section>
   );
 };
+
+const InfoCard = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) => (
+  <div className="bg-white rounded-2xl shadow-sm border border-[#eee3dc] p-4 flex gap-4">
+    <div className="w-11 h-11 rounded-xl bg-[#f8f3ef] flex items-center justify-center">
+      {icon}
+    </div>
+    <div>
+      <p className="text-sm text-[#84699d]">{label}</p>
+      <p className="text-[#220640] font-medium mt-1">{value}</p>
+    </div>
+  </div>
+);

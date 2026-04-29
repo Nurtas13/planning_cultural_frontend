@@ -4,37 +4,38 @@ import welcomeImage from "../../assets/welcome.jpg";
 export const Welcome = () => {
   const navigate = useNavigate();
 
-  const handleGetStarted = () => {
-    navigate("/login");
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#faf7f6] p-4">
-      {/* Карточка */}
-      <div className="bg-white rounded-3xl shadow-lg max-w-sm w-full flex flex-col items-center p-6">
-        {/* Изображение */}
-        <img
-          src={welcomeImage}
-          alt="Welcome"
-          className="w-full h-56 object-cover rounded-2xl mb-6"
-        />
+    <div className="min-h-dvh bg-[#f8f3ef] flex items-center justify-center px-5 py-8">
+      <div className="w-full max-w-5xl bg-white rounded-[32px] shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+        <div className="p-5 md:p-8">
+          <img
+            src={welcomeImage}
+            alt="Welcome"
+            className="w-full h-64 md:h-full min-h-[320px] object-cover rounded-[24px]"
+          />
+        </div>
 
-        {/* Текст */}
-        <h1 className="text-xl lg:text-2xl font-semibold text-[#5b3a87] mb-2">CulturHub</h1>
-        <p className="text-gray-500 text-center mb-2">
-          Discover and create cultural moments
-        </p>
-        <p className="text-gray-400 text-sm text-center mb-6">
-          Connect with concerts, exhibitions, theater plays, festivals, and workshops in your area
-        </p>
+        <div className="flex flex-col justify-center p-8 md:p-12 text-center md:text-left">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#5f3d8c]">
+            CulturHub
+          </h1>
 
-        {/* Кнопка */}
-        <button
-          onClick={handleGetStarted}
-          className="bg-[#5b3a87] text-white font-semibold py-3 w-full rounded-2xl hover:bg-[#4e3175] transition"
-        >
-          Get Started
-        </button>
+          <p className="mt-5 text-xl text-[#614878]">
+            Discover and create cultural moments
+          </p>
+
+          <p className="mt-4 text-[#927da8] leading-7">
+            Connect with concerts, exhibitions, theater plays, festivals, and
+            workshops in your area.
+          </p>
+
+          <button
+            onClick={() => navigate("/login")}
+            className="mt-8 w-full md:w-56 h-14 rounded-2xl bg-[#643b93] text-white font-semibold text-lg hover:bg-[#563483] transition"
+          >
+            Get Started
+          </button>
+        </div>
       </div>
     </div>
   );
