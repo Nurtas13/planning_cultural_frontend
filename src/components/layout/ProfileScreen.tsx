@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getSavedEvents, type SavedEvent } from "../../utils/eventStorage";
 import {
   deleteRegistration,
   fetchUserRegistrations,
@@ -26,6 +25,7 @@ import {
 } from "../../utils/appSettings";
 import { useTranslation } from "../../hooks/useTranslation";
 
+type SavedEvent = any;
 
 
 const fallbackImage =
@@ -47,7 +47,8 @@ export const ProfileScreen = () => {
 
 useEffect(() => {
   const loadData = () => {
-    const saved = getSavedEvents();
+    const savedRaw = localStorage.getItem("savedEvents");
+    const saved = savedRaw ? JSON.parse(savedRaw) : [];
     setSavedEvents(saved);
 
     const userId = Number(localStorage.getItem("userId"));

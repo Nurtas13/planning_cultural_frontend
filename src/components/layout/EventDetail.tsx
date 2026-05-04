@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchEventById } from "../../api/eventsApi";
-import { isEventSaved, toggleSavedEvent } from "../../utils/eventStorage";
+import { isEventSaved } from "../../utils/eventStorage";
 import { createRegistration } from "../../api/registrationsApi";
 type EventItem = {
   id: number;
@@ -76,22 +76,36 @@ export const EventDetail = () => {
   }
 
   const handleSave = () => {
-    if (!event) return;
+  if (!event) return;
 
-    const savedRaw = localStorage.getItem("savedEvents");
-    const savedEvents = savedRaw ? JSON.parse(savedRaw) : [];
+  const key = "savedEvents";
+  const savedRaw = localStorage.getItem(key);
+  const savedEvents = savedRaw ? JSON.parse(savedRaw) : [];
 
-    const exists = savedEvents.some((item: any) => item.id === event.id);
+  const exists = savedEvents.some((item: any) => Number(item.id) === Number(event.id));
 
-    if (exists) {
-      const updated = savedEvents.filter((item: any) => item.id !== event.id);
-      localStorage.setItem("savedEvents", JSON.stringify(updated));
-      setSaved(false);
-    } else {
-      localStorage.setItem("savedEvents", JSON.stringify([...savedEvents, event]));
-      setSaved(true);
-    }
-  };  
+  if (exists) {
+    const updated = savedEvents.filter((item: any) => Number(item.id) !== Number(event.id));
+    localStorage.setItem(key, JSON.stringify(updated));
+    setSaved(false);
+  } else {
+    const eventToSave = {
+      id: event.id,
+      title: event.title,
+      description: event.description || "",
+      category: event.category,
+      location: event.location,
+      event_date: event.event_date,
+      event_time: event.event_time || "",
+      image_url: event.image_url || "",
+      price: event.price || 0,
+      max_participants: event.max_participants || 0,
+    };
+
+    localStorage.setItem(key, JSON.stringify([...savedEvents, eventToSave]));
+    setSaved(true);
+  }
+};
 
   const handleShare = async () => {
     const url = window.location.href;
