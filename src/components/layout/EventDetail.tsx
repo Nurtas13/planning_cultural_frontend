@@ -111,6 +111,13 @@ export const EventDetail = () => {
     const url = `https://planning-cultural-frontend.vercel.app/app/events/${event.id}`;
     const text = `${event.title}\n${event.description || "Cultural event"}\n${url}`;
 
+    const androidWindow = window as any;
+
+    if (androidWindow.AndroidShare) {
+      androidWindow.AndroidShare.share(text);
+      return;
+    }
+
     try {
       if (navigator.share) {
         await navigator.share({
@@ -120,12 +127,11 @@ export const EventDetail = () => {
         });
         return;
       }
-    } catch {}
 
-    const copied = window.prompt("Copy event link:", text);
-
-    if (copied !== null) {
-      alert("You can share this link manually");
+      await navigator.clipboard.writeText(text);
+      alert("Event link copied");
+    } catch {
+      alert(text);
     }
   };
 
