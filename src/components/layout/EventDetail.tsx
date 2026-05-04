@@ -109,31 +109,55 @@ export const EventDetail = () => {
 
   const handleShare = async () => {
     const url = window.location.href;
+    const text = `${event.title}\n${event.description || "Cultural event"}\n${url}`;
 
-    if (navigator.share) {
-      await navigator.share({
-        title: event.title,
-        text: event.description || "Cultural event",
-        url,
-      });
-    } else {
-      await navigator.clipboard.writeText(url);
-      alert("Link copied");
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: event.title,
+          text,
+          url,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(text);
+      alert("Event link copied");
+    } catch {
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("Event link copied");
+      } catch {
+        alert("Sharing is not available on this device");
+      }
     }
   };
   const handleAttend = async () => {
     try {
-      await createRegistration(1, event.id);
+      const userId = Number(localStorage.getItem("userId"));
+
+      if (!userId) {
+        alert("Please sign in first");
+        return;
+      }
+
+      await createRegistration(userId, event.id);
+
       setIsRegistered(true);
       setAttendMessage("You are registered for this event");
     } catch (error) {
-      setIsRegistered(true);
-      setAttendMessage(
-        error instanceof Error ? error.message : "Registration failed"
-      );
+      const message =
+        error instanceof Error ? error.message : "Registration failed";
+
+      if (message.toLowerCase().includes("already registered")) {
+        setIsRegistered(true);
+        setAttendMessage("You are already registered for this event");
+        return;
+      }
+
+      setAttendMessage(message);
     }
   };
-
   return (
     <section className="min-h-full bg-[#fbf7f3]">
       <div className="relative h-72">
