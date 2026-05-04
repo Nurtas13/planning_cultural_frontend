@@ -8,6 +8,7 @@ import { ProfileScreen } from "../components/layout/ProfileScreen";
 import { Main } from "../components/main/Main";
 import { AllEvents } from "../components/layout/AllEvents";
 import { SignUpPage } from "../components/layout/SignUpPage";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -23,15 +24,20 @@ export const router = createBrowserRouter([
     element: <SignUpPage />,
   },
   {
-    path: "/app",
-    element: <Main />,
+    element: <ProtectedRoute />,
     children: [
-      { index: true, element: <Navigate to="/app/home" replace /> },
-      { path: "home", element: <HomePage /> },
-      { path: "events", element: <AllEvents /> },
-      { path: "create", element: <Events /> },
-      { path: "events/:id", element: <EventDetail /> },
-      { path: "profile", element: <ProfileScreen /> },
+      {
+        path: "/app",
+        element: <Main />,
+        children: [
+          { index: true, element: <Navigate to="/app/home" replace /> },
+          { path: "home", element: <HomePage /> },
+          { path: "events", element: <AllEvents /> },
+          { path: "create", element: <Events /> },
+          { path: "events/:id", element: <EventDetail /> },
+          { path: "profile", element: <ProfileScreen /> },
+        ],
+      },
     ],
   },
-]);
+]); 

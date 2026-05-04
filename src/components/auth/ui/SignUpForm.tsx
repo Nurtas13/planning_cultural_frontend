@@ -1,5 +1,5 @@
 import { ArrowLeft, Lock, Mail, Phone, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../../../api/usersApi";
 
@@ -10,6 +10,14 @@ export const SignUpForm = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    navigate("/app/home");
+  }
+}, []);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");

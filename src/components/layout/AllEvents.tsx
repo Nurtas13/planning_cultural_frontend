@@ -2,6 +2,7 @@ import { Calendar, MapPin, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchEvents } from "../../api/eventsApi";
+import { useTranslation } from "../../hooks/useTranslation";
 
 type EventItem = {
   id: number;
@@ -21,11 +22,15 @@ const fallbackImage =
 
 export const AllEvents = () => {
   const navigate = useNavigate();
+  const t = useTranslation();
+
   const [events, setEvents] = useState<EventItem[]>([]);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchEvents().then(setEvents);
+    fetchEvents()
+      .then(setEvents)
+      .catch(() => setEvents([]));
   }, []);
 
   const filteredEvents = useMemo(() => {
@@ -35,18 +40,22 @@ export const AllEvents = () => {
   }, [events, search]);
 
   return (
-    <section className="h-full flex flex-col bg-[#fbf7f3]">
-      <div className="shrink-0 px-6 pt-8 pb-5 bg-[#fbf7f3]">
-        <h1 className="text-3xl font-semibold text-[#563483]">Events</h1>
-        <p className="text-[#84699d] mt-1">All cultural events</p>
+    <section className="h-full flex flex-col bg-[#fbf7f3] dark:bg-[#1f1630] transition">
+      <div className="shrink-0 px-6 pt-8 pb-5 bg-[#fbf7f3] dark:bg-[#1f1630]">
+        <h1 className="text-3xl font-semibold text-[#563483] dark:text-[#f4eaff]">
+          {t.events}
+        </h1>
+        <p className="text-[#84699d] dark:text-[#cdb9e8] mt-1">
+          {t.allCulturalEvents}
+        </p>
 
         <div className="relative mt-5">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#8a76a0]" />
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-[#8a76a0] dark:text-[#d5c3ef]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search events..."
-            className="w-full h-14 rounded-2xl bg-white pl-14 pr-4 text-[#4b2b6f] shadow-md outline-none border border-[#eee4dc]"
+            placeholder={t.searchEvents}
+            className="w-full h-14 rounded-2xl bg-white dark:bg-[#2c2140] pl-14 pr-4 text-[#4b2b6f] dark:text-white shadow-md outline-none border border-[#eee4dc] dark:border-[#44345e]"
           />
         </div>
       </div>
@@ -56,7 +65,7 @@ export const AllEvents = () => {
           <button
             key={event.id}
             onClick={() => navigate(`/app/events/${event.id}`)}
-            className="w-full bg-white rounded-3xl overflow-hidden border border-[#eee3dc] shadow-sm text-left"
+            className="w-full bg-white dark:bg-[#2c2140] rounded-3xl overflow-hidden border border-[#eee3dc] dark:border-[#44345e] shadow-sm text-left transition"
           >
             <img
               src={
@@ -70,7 +79,7 @@ export const AllEvents = () => {
 
             <div className="p-5 space-y-3">
               <div className="flex justify-between gap-3">
-                <h2 className="text-lg font-semibold text-[#220640]">
+                <h2 className="text-lg font-semibold text-[#220640] dark:text-white">
                   {event.title}
                 </h2>
 
@@ -79,18 +88,24 @@ export const AllEvents = () => {
                 </span>
               </div>
 
-              <p className="flex items-center gap-3 text-[#85699e]">
+              <p className="flex items-center gap-3 text-[#85699e] dark:text-[#d5c3ef]">
                 <Calendar size={19} />
                 {event.event_date}
               </p>
 
-              <p className="flex items-center gap-3 text-[#85699e]">
+              <p className="flex items-center gap-3 text-[#85699e] dark:text-[#d5c3ef]">
                 <MapPin size={19} />
                 {event.location}
               </p>
             </div>
           </button>
         ))}
+
+        {filteredEvents.length === 0 && (
+          <p className="text-center text-[#84699d] dark:text-[#d5c3ef] py-10">
+            {t.noEventsFound}
+          </p>
+        )}
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "http://192.168.8.110:8000";
 
 export const loginUser = async (email: string, password: string) => {
   const res = await fetch(`${API_URL}/login`, {
@@ -9,7 +9,7 @@ export const loginUser = async (email: string, password: string) => {
 
   if (!res.ok) {
     const error = await res.json();
-    throw new Error(error.detail);
+    throw new Error(error.detail || "Login failed");
   }
 
   return res.json();
@@ -53,6 +53,39 @@ export const registerUser = async (data: {
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.detail || "Registration failed");
+  }
+
+  return res.json();
+};
+
+export const deleteAccount = async (email: string, password: string) => {
+  const res = await fetch(`${API_URL}/users/delete-account`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || "Failed to delete account");
+  }
+
+  return res.json();
+};
+
+export const googleLogin = async (fullName: string, email: string) => {
+  const res = await fetch(`${API_URL}/google-login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      full_name: fullName,
+      email,
+    }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.detail || "Google login failed");
   }
 
   return res.json();

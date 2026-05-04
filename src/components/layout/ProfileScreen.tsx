@@ -16,7 +16,17 @@ import {
   type UserRegistrationEvent,
 } from "../../api/registrationsApi";
 import { getSavedEvents } from "../../utils/eventStorage";
-import { getUser, updateUser } from "../../api/usersApi";
+import { deleteAccount, getUser, updateUser } from "../../api/usersApi";
+import {
+  getAppLanguage,
+  getAppTheme,
+  setAppLanguage,
+  setAppTheme,
+  type AppLanguage,
+  type AppTheme,
+} from "../../utils/appSettings";
+import { useTranslation } from "../../hooks/useTranslation";
+
 
 
 const fallbackImage =
@@ -24,7 +34,7 @@ const fallbackImage =
 
 export const ProfileScreen = () => {
   const navigate = useNavigate();
-
+  const t = useTranslation();
   const [user, setUser] = useState<any>(null);
 
   const [modal, setModal] = useState<
@@ -33,6 +43,7 @@ export const ProfileScreen = () => {
 
   const [myEvents, setMyEvents] = useState<UserRegistrationEvent[]>([]);
   const [savedEvents, setSavedEvents] = useState<CulturalEvent[]>([]);
+  
 
 
   useEffect(() => {
@@ -61,13 +72,13 @@ export const ProfileScreen = () => {
   };
 
   return (
-    <section className="h-full overflow-y-auto bg-[#fbf7f3] px-6 pt-8 pb-8">
+    <section className="h-full overflow-y-auto bg-[#fbf7f3] dark:bg-[#1f1630] px-6 pt-8 pb-8 transition">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-semibold text-[#563483]">Profile</h1>
+        <h1 className="text-3xl font-semibold text-[#563483] dark:text-[#f4eaff]">{t.profile}</h1>
 
         <button
           onClick={() => setModal("settings")}
-          className="w-11 h-11 rounded-full bg-white shadow-sm border border-[#eee3dc] flex items-center justify-center text-[#84699d]"
+          className="w-11 h-11 rounded-full bg-white dark:bg-[#2c2140] shadow-sm border border-[#eee3dc] dark:border-[#44345e] flex items-center justify-center text-[#84699d] dark:text-[#d5c3ef]"
         >
           <Settings size={24} />
         </button>
@@ -79,28 +90,28 @@ export const ProfileScreen = () => {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold text-[#220640]">
+          <h2 className="text-xl font-semibold text-[#220640] dark:text-white">
             {user?.full_name || "User"}
           </h2>
 
-          <p className="text-[#84699d]">
+          <p className="text-[#84699d] dark:text-[#cdb9e8]">
             {user?.email || "email@example.com"}
           </p>
 
           <div className="flex gap-5 mt-2 text-[#220640]">
             <span>
               <b>{myEvents.length}</b>{" "}
-              <span className="text-[#84699d]">Events</span>
+              <span className="text-[#84699d] dark:text-[#cdb9e8]">{t.eventsCount}</span>
             </span>
             <span>
               <b>{savedEvents.length}</b>{" "}
-              <span className="text-[#84699d]">Saved</span>
+              <span className="text-[#84699d] dark:text-[#cdb9e8]">{t.savedCount}</span>
             </span>
           </div>
         </div>
       </div>
 
-      <Block title="My Events">
+      <Block title={t.myEvents} seeAll={t.seeAll}>
         {myEvents.length > 0 ? (
           myEvents.map((event) => (
             <BackendEventRow
@@ -111,11 +122,11 @@ export const ProfileScreen = () => {
             />
           ))
         ) : (
-          <EmptyText text="You have not attended any events yet" />
+          <EmptyText text={t.noEvents} />
         )}
       </Block>
 
-      <Block title="Saved Events">
+      <Block title={t.savedEvents} seeAll={t.seeAll}>
         {savedEvents.length > 0 ? (
           savedEvents.map((event) => (
             <SavedEventRow
@@ -125,27 +136,29 @@ export const ProfileScreen = () => {
             />
           ))
         ) : (
-          <EmptyText text="No saved events yet" />
+          <EmptyText text={t.noSaved} />
         )}
       </Block>
 
       <div className="mt-8">
-        <h2 className="text-xl font-semibold text-[#220640] mb-4">Settings</h2>
+        <h2 className="text-xl font-semibold text-[#220640] dark:text-white mb-4">
+          {t.settings}
+        </h2>
 
-        <div className="bg-white rounded-3xl border border-[#eee3dc] shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#2c2140] rounded-3xl border border-[#eee3dc] dark:border-[#44345e] shadow-sm overflow-hidden">
           <SettingRow
             icon={<User className="text-[#643b93]" />}
-            title="Edit Profile"
+            title={t.editProfile}
             onClick={() => setModal("edit")}
           />
           <SettingRow
             icon={<Bell className="text-[#e4b72f]" />}
-            title="Notifications"
+            title={t.notifications}
             onClick={() => setModal("notifications")}
           />
           <SettingRow
             icon={<Shield className="text-[#8b77a3]" />}
-            title="Privacy"
+            title={t.privacy}
             onClick={() => setModal("privacy")}
           />
         </div>
@@ -165,15 +178,21 @@ export const ProfileScreen = () => {
 
 const Block = ({
   title,
+  seeAll,
   children,
 }: {
   title: string;
+  seeAll: string;
   children: React.ReactNode;
 }) => (
   <div className="mt-8">
     <div className="flex justify-between items-center mb-4">
-      <h2 className="text-xl font-semibold text-[#220640]">{title}</h2>
-      <button className="text-[#643b93] font-medium">See all</button>
+      <h2 className="text-xl font-semibold text-[#220640] dark:text-white">
+        {title}
+      </h2>
+      <button className="text-[#643b93] dark:text-[#d5c3ef] font-medium">
+        {seeAll}
+      </button>
     </div>
     <div className="space-y-4">{children}</div>
   </div>
@@ -248,7 +267,7 @@ const SavedEventRow = ({
 );
 
 const EmptyText = ({ text }: { text: string }) => (
-  <div className="bg-white rounded-3xl border border-dashed border-[#e4d7ce] p-6 text-center text-[#84699d]">
+  <div className="bg-white dark:bg-[#2c2140] rounded-3xl border border-dashed border-[#e4d7ce] dark:border-[#44345e] p-6 text-center text-[#84699d] dark:text-[#d5c3ef]">
     {text}
   </div>
 );
@@ -264,10 +283,10 @@ const SettingRow = ({
 }) => (
   <button
     onClick={onClick}
-    className="w-full p-5 flex items-center gap-4 border-b last:border-b-0 border-[#eee3dc] text-left"
+    className="w-full p-5 flex items-center gap-4 border-b last:border-b-0 border-[#eee3dc] dark:border-[#44345e] text-left bg-white dark:bg-[#2c2140]"
   >
     {icon}
-    <span className="flex-1 text-[#220640] font-medium">{title}</span>
+    <span className="flex-1 text-[#220640] dark:text-white font-medium">{title}</span>
     <ChevronRight size={20} className="text-[#8b77a3]" />
   </button>
 );
@@ -285,6 +304,42 @@ const ProfileModal = ({
 }) => {
   const [name, setName] = useState(user?.full_name || "");
   const [email, setEmail] = useState(user?.email || "");
+  const [deleteEmail, setDeleteEmail] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [ language, setLanguageState] = useState<AppLanguage>(getAppLanguage());
+  const [theme, setThemeState] = useState<AppTheme>(getAppTheme());
+  const [showLanguages, setShowLanguages] = useState(false);
+  const [showThemes, setShowThemes] = useState(false);
+  const t = useTranslation();
+  const chooseLanguage = (value: AppLanguage) => {
+    setAppLanguage(value);
+    setLanguageState(value);
+    setShowLanguages(false);
+  };
+
+  const chooseTheme = (value: AppTheme) => {
+    setAppTheme(value);
+    setThemeState(value);
+
+    if (value === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
+    setShowThemes(false);
+  };
+  const languageLabels = {
+    en: "English",
+    ru: "Русский",
+    kk: "Қазақша",
+  };
+
+  const themeLabels = {
+    light: "Light",
+    dark: "Dark",
+  };
   const [success, setSuccess] = useState("");
 
   const titles = {
@@ -319,18 +374,36 @@ const ProfileModal = ({
       alert(error instanceof Error ? error.message : "Failed to update profile");
     }
   };
+  const handleDeleteAccount = async () => {
+    try {
+      if (!deleteEmail || !deletePassword) {
+        alert("Enter email and password");
+        return;
+      }
+
+      await deleteAccount(deleteEmail, deletePassword);
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+
+      alert("Account deleted successfully");
+      window.location.href = "/login";
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to delete account");
+    }
+  };
 
   return (
     <div className="absolute inset-0 z-30 bg-black/30 flex items-end">
-      <div className="w-full bg-white rounded-t-[32px] p-6 shadow-2xl">
+      <div className="w-full bg-white dark:bg-[#2c2140] rounded-t-[32px] p-6 shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-[#563483]">
+          <h2 className="text-2xl font-semibold text-[#563483] dark:text-white">
             {titles[type]}
           </h2>
 
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-[#f8f3ef] flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-[#f8f3ef] flex items-center justify-center"  //вуву
           >
             <X size={22} />
           </button>
@@ -388,16 +461,127 @@ const ProfileModal = ({
         )}
 
         {type === "settings" && (
-          <div className="space-y-3 pb-24">
-            <button className="w-full h-14 rounded-2xl bg-[#f8f3ef] text-[#220640] font-medium">
-              Language: English
+          <div className="space-y-4 pb-24">
+            <div className="bg-[#f8f3ef] dark:bg-[#2c2140] rounded-2xl overflow-hidden transition">
+              <button
+                onClick={() => setShowLanguages((prev) => !prev)}
+                className="w-full h-16 px-5 flex items-center justify-between text-[#220640] dark:text-white font-semibold"
+              >
+                <span>Language</span>
+                <span className="text-[#643b93] dark:text-[#d5c3ef]">
+                  {languageLabels[language]}
+                </span>
+              </button>
+
+              {showLanguages && (
+                <div className="px-4 pb-4 grid grid-cols-3 gap-3">
+                  {(["en", "ru", "kk"] as AppLanguage[]).map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => chooseLanguage(item)}
+                      className={`h-11 rounded-xl font-medium transition ${
+                        language === item
+                          ? "bg-[#643b93] text-white"
+                          : "bg-white dark:bg-[#1f1630] text-[#563483] dark:text-[#d5c3ef]"
+                      }`}
+                    >
+                      {languageLabels[item]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="bg-[#f8f3ef] dark:bg-[#1f1630] rounded-2xl overflow-hidden transition">
+              <button
+                onClick={() => setShowThemes((prev) => !prev)}
+                className="w-full h-16 px-5 flex items-center justify-between text-[#220640] dark:text-white font-semibold"
+              >
+                <span>{t.theme}</span>
+                <span className="text-[#643b93] dark:text-[#d5c3ef]">
+                  {themeLabels[theme]}
+                </span>
+              </button>
+
+              {showThemes && (
+                <div className="px-4 pb-4 grid grid-cols-2 gap-3">
+                  {(["light", "dark"] as AppTheme[]).map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => chooseTheme(item)}
+                      className={`h-11 rounded-xl font-medium transition ${
+                        theme === item
+                          ? "bg-[#643b93] text-white"
+                          : "bg-white dark:bg-[#2c2140] text-[#563483] dark:text-[#d5c3ef]"
+                      }`}
+                    >
+                      {themeLabels[item]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => {
+                localStorage.removeItem("token");
+                localStorage.removeItem("userId");
+                window.location.href = "/login";
+              }}
+              className="w-full h-14 rounded-2xl bg-red-50 text-red-500 font-medium"
+            >
+              {t.logout}
             </button>
-            <button className="w-full h-14 rounded-2xl bg-[#f8f3ef] text-[#220640] font-medium">
-              Theme: Light
+            <button
+              onClick={() => setDeleteMode(true)}
+              className="w-full h-14 rounded-2xl bg-red-100 text-red-600 font-medium"
+            >
+              Delete account
             </button>
-            <button className="w-full h-14 rounded-2xl bg-red-50 text-red-500 font-medium">
-              Log out
-            </button>
+          </div>
+        )}
+        {deleteMode && (
+          <div className="absolute inset-0 z-40 bg-black/40 flex items-center justify-center px-6">
+            <div className="w-full max-w-[360px] bg-white dark:bg-[#2c2140] rounded-3xl p-5 shadow-2xl">
+              <h3 className="text-xl font-semibold text-[#563483] dark:text-white mb-2">
+                Delete account
+              </h3>
+
+              <p className="text-sm text-[#84699d] dark:text-[#d5c3ef] mb-4">
+                Enter your email and password to confirm account deletion.
+              </p>
+
+              <div className="space-y-3">
+                <input
+                  value={deleteEmail}
+                  onChange={(e) => setDeleteEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="input"
+                />
+
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="input"
+                />
+
+                <button
+                  onClick={handleDeleteAccount}
+                  className="w-full h-12 rounded-xl bg-red-500 text-white font-semibold"
+                >
+                  Confirm delete
+                </button>
+
+                <button
+                  onClick={() => setDeleteMode(false)}
+                  className="w-full h-12 rounded-xl bg-[#f8f3ef] dark:bg-[#1f1630] text-red-500 font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

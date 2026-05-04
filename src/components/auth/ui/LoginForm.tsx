@@ -1,14 +1,24 @@
-import { ArrowLeft, Facebook, Lock, Mail } from "lucide-react";
+import { ArrowLeft, Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../../api/usersApi";
+import { googleLogin, loginUser } from "../../../api/usersApi";
+import { useEffect } from "react";
+import { auth, googleProvider } from "../../../api/firebase";
+import { signInWithPopup } from "firebase/auth";
 
 export const LoginForm = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  
+  useEffect(() => {
+  const token = localStorage.getItem("token");
 
+  if (token) {
+    navigate("/app/home");
+  }
+}, []);
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -18,17 +28,36 @@ export const LoginForm = () => {
     }
 
     try {
-      const user = await loginUser(email, password);
+      const data = await loginUser(email, password);
 
-      // сохраняем пользователя
-      localStorage.setItem("userId", String(user.id));
+      // сохраняем token и id пользователя  
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("userId", String(data.user.id));
 
       navigate("/app/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     }
   };
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const googleUser = result.user;
 
+      const data = await googleLogin(
+        googleUser.displayName || "Google User",
+        googleUser.email || ""
+      );
+
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("userId", String(data.user.id));
+
+      navigate("/app/home");
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Google login failed");
+    }
+  };
   return (
     <div className="w-full max-w-[430px] bg-white rounded-[32px] shadow-2xl p-7">
       <button
@@ -103,14 +132,12 @@ export const LoginForm = () => {
         <div className="flex-1 border-t border-[#e5dcd5]" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <button className="h-14 rounded-2xl border border-[#e5dcd5] text-[#2e104d] font-medium hover:bg-[#fbf7f3]">
+      <div className="flex justify-center">
+        <button 
+          onClick={handleGoogleLogin}
+          className="w-full max-w-[220px] h-14 rounded-2xl border border-[#e5dcd5] text-[#2e104d] font-medium hover:bg-[#fbf7f3]"
+        >
           Google
-        </button>
-
-        <button className="h-14 rounded-2xl border border-[#e5dcd5] text-[#2e104d] font-medium hover:bg-[#fbf7f3] flex items-center justify-center gap-2">
-          <Facebook size={20} />
-          Facebook
         </button>
       </div>
 

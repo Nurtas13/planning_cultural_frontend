@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "http://192.168.8.110:8000";
 
 export type EventCreatePayload = {
   title: string;
