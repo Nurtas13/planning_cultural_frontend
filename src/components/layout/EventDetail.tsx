@@ -108,7 +108,7 @@ export const EventDetail = () => {
 };
 
   const handleShare = async () => {
-    const url = window.location.href;
+    const url = `https://planning-cultural-frontend.vercel.app/app/events/${event.id}`;
     const text = `${event.title}\n${event.description || "Cultural event"}\n${url}`;
 
     try {
@@ -120,18 +120,15 @@ export const EventDetail = () => {
         });
         return;
       }
+    } catch {}
 
-      await navigator.clipboard.writeText(text);
-      alert("Event link copied");
-    } catch {
-      try {
-        await navigator.clipboard.writeText(text);
-        alert("Event link copied");
-      } catch {
-        alert("Sharing is not available on this device");
-      }
+    const copied = window.prompt("Copy event link:", text);
+
+    if (copied !== null) {
+      alert("You can share this link manually");
     }
   };
+
   const handleAttend = async () => {
     try {
       const userId = Number(localStorage.getItem("userId"));
