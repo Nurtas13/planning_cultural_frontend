@@ -44,22 +44,19 @@ export const ProfileScreen = () => {
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
   
 
+useEffect(() => {
+  const userId = Number(localStorage.getItem("userId"));
 
-  useEffect(() => {
-    localStorage.removeItem("savedEvents");
+  setSavedEvents(getSavedEvents());
 
-    const userId = Number(localStorage.getItem("userId"));
+  if (!userId) return;
 
-    if (!userId) return;
+  getUser(userId).then(setUser);
 
-    getUser(userId).then(setUser);
-
-    fetchUserRegistrations(userId)
-      .then(setMyEvents)
-      .catch(() => setMyEvents([]));
-
-    setSavedEvents(getSavedEvents());
-  }, []);
+  fetchUserRegistrations(userId)
+    .then(setMyEvents)
+    .catch(() => setMyEvents([]));
+}, [navigate]);
 
   const handleRemoveMyEvent = async (registrationId: number) => {
     try {
