@@ -76,9 +76,22 @@ export const EventDetail = () => {
   }
 
   const handleSave = () => {
-    const result = toggleSavedEvent(event);
-    setSaved(result);
-  };
+    if (!event) return;
+
+    const savedRaw = localStorage.getItem("savedEvents");
+    const savedEvents = savedRaw ? JSON.parse(savedRaw) : [];
+
+    const exists = savedEvents.some((item: any) => item.id === event.id);
+
+    if (exists) {
+      const updated = savedEvents.filter((item: any) => item.id !== event.id);
+      localStorage.setItem("savedEvents", JSON.stringify(updated));
+      setSaved(false);
+    } else {
+      localStorage.setItem("savedEvents", JSON.stringify([...savedEvents, event]));
+      setSaved(true);
+    }
+  };  
 
   const handleShare = async () => {
     const url = window.location.href;

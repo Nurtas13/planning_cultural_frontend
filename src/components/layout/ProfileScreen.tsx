@@ -47,7 +47,7 @@ export const ProfileScreen = () => {
 
   useEffect(() => {
     localStorage.removeItem("savedEvents");
-    
+
     const userId = Number(localStorage.getItem("userId"));
 
     if (!userId) return;
@@ -245,7 +245,7 @@ const SavedEventRow = ({
   event,
   onClick,
 }: {
-  event: SavedEvent;
+  event: any;
   onClick: () => void;
 }) => (
   <button
