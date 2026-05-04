@@ -9,13 +9,12 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { CulturalEvent } from "../../data/events";
+import { getSavedEvents, type SavedEvent } from "../../utils/eventStorage";
 import {
   deleteRegistration,
   fetchUserRegistrations,
   type UserRegistrationEvent,
 } from "../../api/registrationsApi";
-import { getSavedEvents } from "../../utils/eventStorage";
 import { deleteAccount, getUser, updateUser } from "../../api/usersApi";
 import {
   getAppLanguage,
@@ -42,7 +41,7 @@ export const ProfileScreen = () => {
   >(null);
 
   const [myEvents, setMyEvents] = useState<UserRegistrationEvent[]>([]);
-  const [savedEvents, setSavedEvents] = useState<CulturalEvent[]>([]);
+  const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
   
 
 
@@ -244,7 +243,7 @@ const SavedEventRow = ({
   event,
   onClick,
 }: {
-  event: CulturalEvent;
+  event: SavedEvent;
   onClick: () => void;
 }) => (
   <button
@@ -252,14 +251,18 @@ const SavedEventRow = ({
     className="w-full bg-white rounded-3xl border border-[#eee3dc] shadow-sm p-4 flex items-center gap-4 text-left"
   >
     <img
-      src={event.image}
+      src={
+        event.image_url && event.image_url.includes("images.unsplash.com")
+          ? event.image_url
+          : fallbackImage
+      }
       alt={event.title}
       className="w-20 h-20 rounded-2xl object-cover"
     />
 
     <div className="flex-1">
       <h3 className="font-semibold text-[#220640]">{event.title}</h3>
-      <p className="text-[#84699d] mt-1">{event.date}</p>
+      <p className="text-[#84699d] mt-1">{event.event_date}</p>
     </div>
 
     <ChevronRight className="text-[#8b77a3]" />

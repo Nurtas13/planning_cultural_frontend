@@ -76,7 +76,7 @@ export const EventDetail = () => {
   }
 
   const handleSave = () => {
-    const result = toggleSavedEvent(event.id);
+    const result = toggleSavedEvent(event);
     setSaved(result);
   };
 

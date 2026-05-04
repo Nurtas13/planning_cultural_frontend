@@ -1,36 +1,41 @@
-import { culturalEvents } from "../data/events";
+export type SavedEvent = {
+  id: number;
+  title: string;
+  description?: string;
+  category: string;
+  location: string;
+  event_date: string;
+  event_time?: string;
+  image_url?: string | null;
+  price?: number;
+  max_participants?: number | null;
+};
 
-const SAVED_EVENTS_KEY = "saved_event_ids";
+const SAVED_EVENTS_KEY = "savedEvents";
 
-export const getSavedEventIds = (): number[] => {
-  try {
-    const data = localStorage.getItem(SAVED_EVENTS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    localStorage.removeItem(SAVED_EVENTS_KEY);
-    return [];
-  }
+export const getSavedEvents = (): SavedEvent[] => {
+  const saved = localStorage.getItem(SAVED_EVENTS_KEY);
+  return saved ? JSON.parse(saved) : [];
 };
 
 export const isEventSaved = (eventId: number): boolean => {
-  return getSavedEventIds().includes(eventId);
+  return getSavedEvents().some((event) => event.id === eventId);
 };
 
-export const toggleSavedEvent = (eventId: number): boolean => {
-  const savedIds = getSavedEventIds();
+export const toggleSavedEvent = (event: SavedEvent): boolean => {
+  const savedEvents = getSavedEvents();
+  const exists = savedEvents.some((item) => item.id === event.id);
 
-  if (savedIds.includes(eventId)) {
-    const updated = savedIds.filter((id) => id !== eventId);
+  if (exists) {
+    const updated = savedEvents.filter((item) => item.id !== event.id);
     localStorage.setItem(SAVED_EVENTS_KEY, JSON.stringify(updated));
     return false;
   }
 
-  const updated = [...savedIds, eventId];
-  localStorage.setItem(SAVED_EVENTS_KEY, JSON.stringify(updated));
-  return true;
-};
+  localStorage.setItem(
+    SAVED_EVENTS_KEY,
+    JSON.stringify([...savedEvents, event])
+  );
 
-export const getSavedEvents = () => {
-  const savedIds = getSavedEventIds();
-  return culturalEvents.filter((event) => savedIds.includes(event.id));
+  return true;
 };
