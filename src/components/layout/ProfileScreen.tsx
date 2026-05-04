@@ -8,7 +8,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getSavedEvents, type SavedEvent } from "../../utils/eventStorage";
 import {
   deleteRegistration,
@@ -33,6 +33,7 @@ const fallbackImage =
 
 export const ProfileScreen = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const t = useTranslation();
   const [user, setUser] = useState<any>(null);
 
@@ -45,18 +46,29 @@ export const ProfileScreen = () => {
   
 
 useEffect(() => {
-  const userId = Number(localStorage.getItem("userId"));
+  const loadData = () => {
+    const saved = getSavedEvents();
+    setSavedEvents(saved);
 
-  setSavedEvents(getSavedEvents());
+    const userId = Number(localStorage.getItem("userId"));
 
-  if (!userId) return;
+    if (!userId) return;
 
-  getUser(userId).then(setUser);
+    getUser(userId).then(setUser);
 
-  fetchUserRegistrations(userId)
-    .then(setMyEvents)
-    .catch(() => setMyEvents([]));
-}, [navigate]);
+    fetchUserRegistrations(userId)
+      .then(setMyEvents)
+      .catch(() => setMyEvents([]));
+  };
+
+  loadData();
+
+  window.addEventListener("focus", loadData);
+
+  return () => {
+    window.removeEventListener("focus", loadData);
+  };
+}, [location.pathname]);
 
   const handleRemoveMyEvent = async (registrationId: number) => {
     try {
