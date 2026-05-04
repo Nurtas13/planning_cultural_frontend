@@ -1,4 +1,4 @@
-const API_URL = "http://192.168.8.110:8000";
+const API_URL = "https://planing-cultural-backend.onrender.com";
 
 export type EventCreatePayload = {
   title: string;
